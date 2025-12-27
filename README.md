@@ -109,18 +109,6 @@ llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.7)
 - Resume conversations anytime
 - Thread state managed by LangGraph checkpointer
 
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-## 📄 License
-
-This project is open source and available under the MIT License.
-
-## 👨‍💻 Author
-
-**Akash Yadav**
-- GitHub: [@akashcodejames](https://github.com/akashcodejames)
 
 ## 🙏 Acknowledgments
 
@@ -128,6 +116,3 @@ This project is open source and available under the MIT License.
 - Powered by [OpenAI](https://openai.com/)
 - UI with [Streamlit](https://streamlit.io/)
 
----
-
-⭐ If you find this project useful, please consider giving it a star!
