@@ -111,9 +111,13 @@ if user_input := st.chat_input("Type your message here..."):
         
         stream_container.markdown(full_response)
 
-    # 4. Generate Title (If this was the first message)
+    # 4. Generate Title (If this was the first message) or Update Timestamp
     if is_first_message:
         with st.spinner("Generating conversation title..."):
             new_title = chat_backend.generate_chat_name(user_input)
             chat_backend.save_thread_title(st.session_state['thread_id'], new_title)
             st.rerun() # Rerun to update the sidebar title immediately
+    else:
+        # Update timestamp for existing thread to move it to top
+        chat_backend.update_thread_timestamp(st.session_state['thread_id'])
+        st.rerun() # Rerun to update sidebar ordering

@@ -41,14 +41,28 @@ def init_title_db():
         c.execute("""
             CREATE TABLE IF NOT EXISTS thread_titles (
                 thread_id TEXT PRIMARY KEY,
-                title TEXT
+                title TEXT,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         """)
         c.commit()
 
 def save_thread_title(thread_id, title):
     with sqlite3.connect(DB_PATH, check_same_thread=False) as c:
-        c.execute("INSERT OR REPLACE INTO thread_titles (thread_id, title) VALUES (?, ?)", (str(thread_id), title))
+        c.execute("""
+            INSERT OR REPLACE INTO thread_titles (thread_id, title, updated_at) 
+            VALUES (?, ?, CURRENT_TIMESTAMP)
+        """, (str(thread_id), title))
+        c.commit()
+
+def update_thread_timestamp(thread_id):
+    """Updates the timestamp for a thread to mark it as recently active."""
+    with sqlite3.connect(DB_PATH, check_same_thread=False) as c:
+        c.execute("""
+            UPDATE thread_titles 
+            SET updated_at = CURRENT_TIMESTAMP 
+            WHERE thread_id = ?
+        """, (str(thread_id),))
         c.commit()
 
 def get_thread_title(thread_id):
@@ -58,11 +72,25 @@ def get_thread_title(thread_id):
         return result[0] if result else "New Chat"
 
 def get_all_thread_ids():
-    """Retrieves all thread IDs known to the checkpointer."""
+    """Retrieves all thread IDs known to the checkpointer, sorted by most recent first."""
     all_threads = set()
     for checkpoint in checkpointer.list(None):
         all_threads.add(checkpoint.config['configurable']['thread_id'])
-    return list(all_threads)
+    
+    # Sort by timestamp from our titles table (most recent first)
+    with sqlite3.connect(DB_PATH, check_same_thread=False) as c:
+        cursor = c.execute("""
+            SELECT thread_id FROM thread_titles 
+            ORDER BY updated_at DESC
+        """)
+        sorted_threads = [row[0] for row in cursor.fetchall()]
+    
+    # Add any threads that exist in checkpoint but not in titles table
+    for thread_id in all_threads:
+        if thread_id not in sorted_threads:
+            sorted_threads.append(thread_id)
+    
+    return sorted_threads
 
 def generate_chat_name(user_message_content):
     """Uses LLM to generate a short title based on the first message."""
