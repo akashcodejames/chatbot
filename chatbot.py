@@ -1,7 +1,7 @@
 from langgraph.graph import StateGraph, START, END
 from typing import TypedDict, Annotated
 from langchain_core.messages import BaseMessage, SystemMessage, HumanMessage
-from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_groq import ChatGroq
 from langgraph.checkpoint.sqlite import SqliteSaver
 from langgraph.graph.message import add_messages
 from dotenv import load_dotenv
@@ -10,7 +10,7 @@ import sqlite3
 load_dotenv()
 
 # Shared LLM instance
-llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", temperature=0.7)
+llm = ChatGroq(model="llama-3.3-70b-versatile", temperature=0.7)
 
 # --- Graph Definition (Same as your original) ---
 class ChatState(TypedDict):
